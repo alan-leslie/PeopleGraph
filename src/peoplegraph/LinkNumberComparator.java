@@ -14,9 +14,9 @@ public class LinkNumberComparator implements Comparator {
 
     @Override
     public int compare(Object o1, Object o2) {
-        PersonLinks p1 = (PersonLinks)o1;
-        PersonLinks p2 = (PersonLinks)o2;
-        
+        PersonLinks p1 = (PersonLinks) o1;
+        PersonLinks p2 = (PersonLinks) o2;
+
         return p1.compareTo(p2);
     }
 }

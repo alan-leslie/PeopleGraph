@@ -4,7 +4,6 @@
  */
 package peoplegraph;
 
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -31,6 +30,7 @@ import javax.swing.JFrame;
  * @author al
  */
 public class PeopleGraph {
+
     List<PersonLinks> peopleLinksList = null;
     Graph<String, String> peopleGraph = null;
 
@@ -42,10 +42,10 @@ public class PeopleGraph {
         peopleLinksList = generateSortedLinks(peopleLinks);
         peopleGraph = generateGraph(peopleLinksList);
     }
-    
-    private Map<String, PersonLinks> generateMap(List<String[]> fileData){
+
+    private Map<String, PersonLinks> generateMap(List<String[]> fileData) {
         Map<String, PersonLinks> retVal = new HashMap<String, PersonLinks>();
-        
+
         for (String[] theLinkPair : fileData) {
             String theSource = theLinkPair[1];
             String theTarget = theLinkPair[0];
@@ -60,31 +60,31 @@ public class PeopleGraph {
                 retVal.put(theSource, theLinks);
             }
         }
-                
-        return retVal;     
+
+        return retVal;
     }
-    
-    private List<PersonLinks> generateSortedLinks(Map<String, PersonLinks> peopleLinks){
+
+    private List<PersonLinks> generateSortedLinks(Map<String, PersonLinks> peopleLinks) {
         List<PersonLinks> retVal = new ArrayList<PersonLinks>();
-        
+
         for (Map.Entry<String, PersonLinks> entry : peopleLinks.entrySet()) {
             retVal.add(entry.getValue());
         }
-               
+
         Collections.sort(retVal, new LinkNumberComparator());
 
         for (PersonLinks theLinks : retVal) {
             String theSource = theLinks.getSource();
             int numLinks = theLinks.numLinks();
 
-            if (numLinks > 0) {
+            if (numLinks > 1) {
                 System.out.println(theSource + ":" + Integer.toString(numLinks));
             }
         }
-        
-        return retVal;      
+
+        return retVal;
     }
-    
+
     private Graph<String, String> generateGraph(List<PersonLinks> peopleLinks) {
         Graph<String, String> g = new DirectedSparseMultigraph<String, String>();
         Set<String> vertexSet = new TreeSet<String>();
@@ -93,12 +93,12 @@ public class PeopleGraph {
         for (PersonLinks theLinks : peopleLinks) {
             String theSourceBaseName = getURLBasename(theLinks.getSource());
             int numLinks = theLinks.numLinks();
-            
+
 //            if(!(theSourceBaseName.equalsIgnoreCase("University_of_Edinburgh") ||
 //                theSourceBaseName.equalsIgnoreCase("Scotland"))){
 //                numLinks = 0;              
 //            }
-            
+
             if (numLinks > 3) {
                 if (!vertexSet.contains(theSourceBaseName)) {
                     g.addVertex(theSourceBaseName);
@@ -110,12 +110,12 @@ public class PeopleGraph {
 
                     if (!vertexSet.contains(theTargetBasename)) {
                         g.addVertex(theTargetBasename);
-                        vertexSet.add(theTargetBasename);             
+                        vertexSet.add(theTargetBasename);
                     }
 
                     String edgeName = "Edge-" + Integer.toString(edgeCounter);
                     ++edgeCounter;
-                    g.addEdge(edgeName,theTargetBasename, theSourceBaseName, EdgeType.DIRECTED);                    
+                    g.addEdge(edgeName, theTargetBasename, theSourceBaseName, EdgeType.DIRECTED);
                 }
             }
         }
