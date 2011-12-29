@@ -55,6 +55,9 @@ public class PeopleGraph {
     Map<String, Paint> vertexPaints =
         LazyMap.<String, Paint>decorate(new HashMap<String, Paint>(),
         new ConstantTransformer(Color.white));
+    Map<String, Paint> edgePaints =
+        LazyMap.<String, Paint>decorate(new HashMap<String, Paint>(),
+        new ConstantTransformer(Color.blue));
 
     PeopleGraph(String linkFileName) {
         String theFileName = linkFileName;
@@ -152,6 +155,48 @@ public class PeopleGraph {
         String theBasename = theComponents[theComponents.length - 1];
         return theBasename;
     }
+    
+    public void recolor(AggregateLayout<String, String> layout,
+            int numEdgesToRemove,
+            Color[] colors) {
+        // TODO - want to use the slider values to filter the nodes that are outside
+        // the range (number of edges in)
+        // in the first instance try to recolour the vertices and incoming edges
+        //Now cluster the vertices by removing the top 50 edges with highest betweenness
+        //		if (numEdgesToRemove == 0) {
+        //			colorCluster( g.getVertices(), colors[0] );
+        //		} else {
+
+        Graph<String, String> g = layout.getGraph();
+        layout.removeAll();
+
+//        EdgeBetweennessClusterer<Number, Number> clusterer =
+//                new EdgeBetweennessClusterer<Number, Number>(numEdgesToRemove);
+//        Set<Set<Number>> clusterSet = clusterer.transform(g);
+//        List<Number> edges = clusterer.getEdgesRemoved();
+
+        int i = 0;
+        //Set the colors of each node so that each cluster's vertices have the same color
+//        for (Iterator<Set<Number>> cIt = clusterSet.iterator(); cIt.hasNext();) {
+//
+//            Set<Number> vertices = cIt.next();
+//            Color c = colors[i % colors.length];
+//
+//            colorCluster(vertices, c);
+//            if (groupClusters == true) {
+//                groupCluster(layout, vertices);
+//            }
+//            i++;
+//        }
+//        for (Number e : g.getEdges()) {
+//
+//            if (edges.contains(e)) {
+//                edgePaints.put(e, Color.lightGray);
+//            } else {
+//                edgePaints.put(e, Color.black);
+//            }
+//        }
+    }
 
     /**
      * @param args the command line arguments
@@ -160,7 +205,6 @@ public class PeopleGraph {
         PeopleGraph sgv = new PeopleGraph("uoe.psv"); // Creates the graph...
 
         // Layout<V, E>, VisualizationComponent<V,E>
-//        Layout<String, String> layout = new CircleLayout(sgv.peopleGraph);
         Layout<String, String> layout =
         	new AggregateLayout<String,String>(new FRLayout<String,String>(sgv.peopleGraph));
         layout.setSize(new Dimension(600, 600));
@@ -169,8 +213,7 @@ public class PeopleGraph {
         // Show vertex and edge labels
         vv.getRenderContext().setVertexLabelTransformer(new ToStringLabeller());
         vv.getRenderContext().setVertexFillPaintTransformer(MapTransformer.<String, Paint>getInstance(sgv.vertexPaints));
-
-//        vv.getRenderContext().setEdgeLabelTransformer(new ToStringLabeller());
+//      Edge names add no value here  vv.getRenderContext().setEdgeLabelTransformer(new ToStringLabeller());
         // Create a graph mouse and add it to the visualization component
         DefaultModalGraphMouse gm = new DefaultModalGraphMouse();
         gm.setMode(ModalGraphMouse.Mode.TRANSFORMING);
@@ -188,7 +231,10 @@ public class PeopleGraph {
         edgeBetweennessSlider.setMajorTickSpacing(10);
         edgeBetweennessSlider.setPaintLabels(true);
         edgeBetweennessSlider.setPaintTicks(true);
-        
+
+//        	g.removeEdge(e);
+//	g.removeVertex(v1);
+
 //        edgeBetweennessSlider.addChangeListener(new ChangeListener() {
 //			public void stateChanged(ChangeEvent e) {
 //				JSlider source = (JSlider) e.getSource();
