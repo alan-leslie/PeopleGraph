@@ -65,7 +65,7 @@ public class PeopleGraph {
         List<String[]> fileData = CSVFile.getFileData(theFileName, "\\|");
         Map<String, PersonLinks> peopleLinks = generateMap(fileData);
         peopleLinksList = generateSortedLinks(peopleLinks);
-        peopleGraph = generateGraph(peopleLinksList);
+        peopleGraph = generateGraph(peopleLinksList, 1, 100);
     }
 
     private Map<String, PersonLinks> generateMap(List<String[]> fileData) {
@@ -110,7 +110,16 @@ public class PeopleGraph {
         return retVal;
     }
 
-    private Graph<String, String> generateGraph(List<PersonLinks> peopleLinks) {
+    /**
+     * 
+     * @param peopleLinks
+     * @param lowerBound - must be less than upper bound and greater than zero
+     * @param upperBound
+     * @return
+     */
+    public Graph<String, String> generateGraph(List<PersonLinks> peopleLinks,
+            int lowerBound,
+            int upperBound) {
         Graph<String, String> g = new DirectedSparseMultigraph<String, String>();
         Set<String> vertexSet = new TreeSet<String>();
         int edgeCounter = 0;
@@ -124,7 +133,8 @@ public class PeopleGraph {
 //                numLinks = 0;              
 //            }
 
-            if (numLinks > 3) {
+            if (numLinks > lowerBound &&
+                    numLinks < upperBound) {
                 if (!vertexSet.contains(theSourceBaseName)) {
                     g.addVertex(theSourceBaseName);
                     vertexSet.add(theSourceBaseName);
