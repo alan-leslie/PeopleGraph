@@ -4,7 +4,6 @@
  */
 package peoplegraph;
 
-import edu.uci.ics.jung.algorithms.layout.AggregateLayout;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -13,8 +12,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 
-import edu.uci.ics.jung.algorithms.layout.CircleLayout;
 import edu.uci.ics.jung.algorithms.layout.FRLayout;
+import edu.uci.ics.jung.algorithms.layout.AggregateLayout;
 import edu.uci.ics.jung.algorithms.layout.Layout;
 import edu.uci.ics.jung.graph.Graph;
 import edu.uci.ics.jung.graph.DirectedSparseMultigraph;
@@ -29,17 +28,25 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Container;
 import java.awt.Dimension;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
 import java.awt.GridLayout;
+import java.awt.Insets;
 import java.awt.Paint;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
+import javax.swing.JButton;
 import javax.swing.JFrame;
+import javax.swing.JLabel;
 import javax.swing.JPanel;
-import javax.swing.JSlider;
 import javax.swing.border.TitledBorder;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
+import slider.RangeSlider;
+
 import org.apache.commons.collections15.functors.ConstantTransformer;
 import org.apache.commons.collections15.functors.MapTransformer;
 import org.apache.commons.collections15.map.LazyMap;
@@ -53,11 +60,11 @@ public class PeopleGraph {
     List<PersonLinks> peopleLinksList = null;
     Graph<String, String> peopleGraph = null;
     Map<String, Paint> vertexPaints =
-        LazyMap.<String, Paint>decorate(new HashMap<String, Paint>(),
-        new ConstantTransformer(Color.white));
+            LazyMap.<String, Paint>decorate(new HashMap<String, Paint>(),
+            new ConstantTransformer(Color.white));
     Map<String, Paint> edgePaints =
-        LazyMap.<String, Paint>decorate(new HashMap<String, Paint>(),
-        new ConstantTransformer(Color.blue));
+            LazyMap.<String, Paint>decorate(new HashMap<String, Paint>(),
+            new ConstantTransformer(Color.blue));
 
     PeopleGraph(String linkFileName) {
         String theFileName = linkFileName;
@@ -133,8 +140,8 @@ public class PeopleGraph {
 //                numLinks = 0;              
 //            }
 
-            if (numLinks > lowerBound &&
-                    numLinks < upperBound) {
+            if (numLinks > lowerBound
+                    && numLinks < upperBound) {
                 if (!vertexSet.contains(theSourceBaseName)) {
                     g.addVertex(theSourceBaseName);
                     vertexSet.add(theSourceBaseName);
@@ -165,7 +172,7 @@ public class PeopleGraph {
         String theBasename = theComponents[theComponents.length - 1];
         return theBasename;
     }
-    
+
     public void recolor(AggregateLayout<String, String> layout,
             int numEdgesToRemove,
             Color[] colors) {
@@ -206,6 +213,9 @@ public class PeopleGraph {
 //                edgePaints.put(e, Color.black);
 //            }
 //        }
+
+        //        	g.removeEdge(e);
+//	g.removeVertex(v1);
     }
 
     /**
@@ -216,10 +226,10 @@ public class PeopleGraph {
 
         // Layout<V, E>, VisualizationComponent<V,E>
         Layout<String, String> layout =
-        	new AggregateLayout<String,String>(new FRLayout<String,String>(sgv.peopleGraph));
-        layout.setSize(new Dimension(600, 600));
+                new AggregateLayout<String, String>(new FRLayout<String, String>(sgv.peopleGraph));
+        layout.setSize(new Dimension(500, 500));
         VisualizationViewer<String, String> vv = new VisualizationViewer<String, String>(layout);
-        vv.setPreferredSize(new Dimension(650, 650));
+        vv.setPreferredSize(new Dimension(550, 550));
         // Show vertex and edge labels
         vv.getRenderContext().setVertexLabelTransformer(new ToStringLabeller());
         vv.getRenderContext().setVertexFillPaintTransformer(MapTransformer.<String, Paint>getInstance(sgv.vertexPaints));
@@ -230,53 +240,76 @@ public class PeopleGraph {
         vv.setGraphMouse(gm);
         // Add the mouses mode key listener to work it needs to be added to the visualization component
         vv.addKeyListener(gm.getModeKeyListener());
-        
-        final JSlider edgeBetweennessSlider = new JSlider(JSlider.HORIZONTAL);
-        edgeBetweennessSlider.setBackground(Color.WHITE);
-        edgeBetweennessSlider.setPreferredSize(new Dimension(210, 50));
-        edgeBetweennessSlider.setPaintTicks(true);
-        edgeBetweennessSlider.setMaximum(sgv.peopleGraph.getEdgeCount());
-        edgeBetweennessSlider.setMinimum(0);
-        edgeBetweennessSlider.setValue(0);
-        edgeBetweennessSlider.setMajorTickSpacing(10);
-        edgeBetweennessSlider.setPaintLabels(true);
-        edgeBetweennessSlider.setPaintTicks(true);
 
-//        	g.removeEdge(e);
-//	g.removeVertex(v1);
+        JLabel rangeSliderLabel1 = new JLabel();
+        final JLabel rangeSliderValue1 = new JLabel();
+        JLabel rangeSliderLabel2 = new JLabel();
+        final JLabel rangeSliderValue2 = new JLabel();
+        RangeSlider rangeSlider = new RangeSlider();
 
-//        edgeBetweennessSlider.addChangeListener(new ChangeListener() {
-//			public void stateChanged(ChangeEvent e) {
-//				JSlider source = (JSlider) e.getSource();
-//				if (!source.getValueIsAdjusting()) {
-//					int numEdgesToRemove = source.getValue();
-//					clusterAndRecolor(layout, numEdgesToRemove, similarColors,
-//							groupVertices.isSelected());
-//					sliderBorder.setTitle(
-//						COMMANDSTRING + edgeBetweennessSlider.getValue());
-//					eastControls.repaint();
-//					vv.validate();
-//					vv.repaint();
+        rangeSliderLabel1.setText("Lower:");
+        rangeSliderLabel2.setText("Upper:");
+        rangeSliderValue1.setHorizontalAlignment(JLabel.LEFT);
+        rangeSliderValue2.setHorizontalAlignment(JLabel.LEFT);
+
+        rangeSlider.setPreferredSize(new Dimension(240, rangeSlider.getPreferredSize().height));
+        rangeSlider.setMinimum(0);
+        rangeSlider.setMaximum(100);
+
+        rangeSlider.addChangeListener(new ChangeListener() {
+
+            public void stateChanged(ChangeEvent e) {
+                RangeSlider slider = (RangeSlider) e.getSource();
+                rangeSliderValue1.setText(String.valueOf(slider.getValue()) + "%");
+                rangeSliderValue2.setText(String.valueOf(slider.getUpperValue()) + "%");
+            }
+        });
+
+        JButton scramble = new JButton("Recalculate");
+        scramble.addActionListener(new ActionListener() {
+
+            public void actionPerformed(ActionEvent arg0) {
+//				Layout layout = vv.getGraphLayout();
+//				layout.initialize();
+//				Relaxer relaxer = vv.getModel().getRelaxer();
+//				if(relaxer != null) {
+//					relaxer.stop();
+//					relaxer.prerelax();
+//					relaxer.relax();
 //				}
-//			}
-//		});
-        
+                //					vv.validate();
+//					vv.repaint();
+            }
+        });
+
         final JPanel eastControls = new JPanel();
         eastControls.setOpaque(true);
-        eastControls.setLayout(new BoxLayout(eastControls, BoxLayout.Y_AXIS));
-        eastControls.add(Box.createVerticalGlue());
-        eastControls.add(edgeBetweennessSlider);
-        
-        final String COMMANDSTRING = "Edges removed for clusters: ";
-        final String eastSize = COMMANDSTRING + edgeBetweennessSlider.getValue();
+        eastControls.setLayout(new GridBagLayout());
 
-        final TitledBorder sliderBorder = BorderFactory.createTitledBorder(eastSize);
+        eastControls.add(Box.createVerticalGlue());
+        eastControls.add(rangeSliderLabel1, new GridBagConstraints(0, 0, 1, 1, 0.0, 0.0,
+                GridBagConstraints.NORTHWEST, GridBagConstraints.NONE, new Insets(0, 0, 3, 3), 0, 0));
+        eastControls.add(rangeSliderValue1, new GridBagConstraints(1, 0, 1, 1, 0.0, 0.0,
+                GridBagConstraints.NORTHWEST, GridBagConstraints.NONE, new Insets(0, 0, 3, 0), 0, 0));
+        eastControls.add(rangeSliderLabel2, new GridBagConstraints(0, 1, 1, 1, 0.0, 0.0,
+                GridBagConstraints.NORTHWEST, GridBagConstraints.NONE, new Insets(0, 0, 3, 3), 0, 0));
+        eastControls.add(rangeSliderValue2, new GridBagConstraints(1, 1, 1, 1, 0.0, 0.0,
+                GridBagConstraints.NORTHWEST, GridBagConstraints.NONE, new Insets(0, 0, 6, 0), 0, 0));
+        eastControls.add(rangeSlider, new GridBagConstraints(0, 2, 2, 1, 0.0, 0.0,
+                GridBagConstraints.NORTHWEST, GridBagConstraints.NONE, new Insets(0, 0, 0, 0), 0, 0));
+        eastControls.add(scramble, new GridBagConstraints(0, 3, 2, 1, 0.0, 0.0,
+                GridBagConstraints.NORTHWEST, GridBagConstraints.NONE, new Insets(0, 0, 0, 0), 0, 0));
+
+//        final String COMMANDSTRING = "Edges removed for clusters: ";
+//        final String eastSize = COMMANDSTRING + "0"; // edgeBetweennessSlider.getValue();
+
+        final TitledBorder sliderBorder = BorderFactory.createTitledBorder("Characteristics");
         eastControls.setBorder(sliderBorder);
         //eastControls.add(eastSize);
         eastControls.add(Box.createVerticalGlue());
-        
+
         JPanel south = new JPanel();
-        JPanel grid = new JPanel(new GridLayout(2,1));
+        JPanel grid = new JPanel(new GridLayout(2, 1));
 //        grid.add(scramble);
 //        grid.add(groupVertices);
         south.add(grid);
@@ -285,12 +318,19 @@ public class PeopleGraph {
         p.setBorder(BorderFactory.createTitledBorder("Mouse Mode"));
         p.add(gm.getModeComboBox());
         south.add(p);
-        
+
         JFrame frame = new JFrame("Famous Scots Links");
-        
+
         Container content = frame.getContentPane();
         content.add(new GraphZoomScrollPane(vv));
         content.add(south, BorderLayout.SOUTH);
+
+        rangeSlider.setValue(1);
+        rangeSlider.setUpperValue(100);
+
+        // Initialize value display.
+        rangeSliderValue1.setText(String.valueOf(rangeSlider.getValue()) + "%");
+        rangeSliderValue2.setText(String.valueOf(rangeSlider.getUpperValue()) + "%");
 
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 //        frame.getContentPane().add(vv);
