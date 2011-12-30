@@ -57,7 +57,7 @@ import org.apache.commons.collections15.map.LazyMap;
  */
 public class PeopleGraph {
 
-    List<PersonLinks> peopleLinksList = null;
+    private List<PersonLinks> peopleLinksList = null;
     Graph<String, String> peopleGraph = null;
     Map<String, Paint> vertexPaints =
             LazyMap.<String, Paint>decorate(new HashMap<String, Paint>(),
@@ -65,6 +65,7 @@ public class PeopleGraph {
     Map<String, Paint> edgePaints =
             LazyMap.<String, Paint>decorate(new HashMap<String, Paint>(),
             new ConstantTransformer(Color.blue));
+    private int theMaxNumLinks = 1;
 
     PeopleGraph(String linkFileName) {
         String theFileName = linkFileName;
@@ -72,7 +73,7 @@ public class PeopleGraph {
         List<String[]> fileData = CSVFile.getFileData(theFileName, "\\|");
         Map<String, PersonLinks> peopleLinks = generateMap(fileData);
         peopleLinksList = generateSortedLinks(peopleLinks);
-        peopleGraph = generateGraph(peopleLinksList, 1, 100);
+        generateGraph(2, theMaxNumLinks);
     }
 
     private Map<String, PersonLinks> generateMap(List<String[]> fileData) {
@@ -113,35 +114,30 @@ public class PeopleGraph {
                 System.out.println(theSource + ":" + Integer.toString(numLinks));
             }
         }
+        
+        theMaxNumLinks = retVal.get(retVal.size() - 1).numLinks();
 
         return retVal;
     }
 
     /**
      * 
-     * @param peopleLinks
      * @param lowerBound - must be less than upper bound and greater than zero
      * @param upperBound
      * @return
      */
-    public Graph<String, String> generateGraph(List<PersonLinks> peopleLinks,
-            int lowerBound,
+    public void generateGraph(int lowerBound,
             int upperBound) {
         Graph<String, String> g = new DirectedSparseMultigraph<String, String>();
         Set<String> vertexSet = new TreeSet<String>();
         int edgeCounter = 0;
 
-        for (PersonLinks theLinks : peopleLinks) {
+        for (PersonLinks theLinks : peopleLinksList) {
             String theSourceBaseName = getURLBasename(theLinks.getSource());
             int numLinks = theLinks.numLinks();
 
-//            if(!(theSourceBaseName.equalsIgnoreCase("University_of_Edinburgh") ||
-//                theSourceBaseName.equalsIgnoreCase("Scotland"))){
-//                numLinks = 0;              
-//            }
-
-            if (numLinks > lowerBound
-                    && numLinks < upperBound) {
+            if (numLinks >= lowerBound
+                    && numLinks <= upperBound) {
                 if (!vertexSet.contains(theSourceBaseName)) {
                     g.addVertex(theSourceBaseName);
                     vertexSet.add(theSourceBaseName);
@@ -163,8 +159,8 @@ public class PeopleGraph {
                 }
             }
         }
-
-        return g;
+        
+        this.peopleGraph = g;
     }
 
     String getURLBasename(String theUrl) {
@@ -172,63 +168,22 @@ public class PeopleGraph {
         String theBasename = theComponents[theComponents.length - 1];
         return theBasename;
     }
-
-    public void recolor(AggregateLayout<String, String> layout,
-            int numEdgesToRemove,
-            Color[] colors) {
-        // TODO - want to use the slider values to filter the nodes that are outside
-        // the range (number of edges in)
-        // in the first instance try to recolour the vertices and incoming edges
-        //Now cluster the vertices by removing the top 50 edges with highest betweenness
-        //		if (numEdgesToRemove == 0) {
-        //			colorCluster( g.getVertices(), colors[0] );
-        //		} else {
-
-        Graph<String, String> g = layout.getGraph();
-        layout.removeAll();
-
-//        EdgeBetweennessClusterer<Number, Number> clusterer =
-//                new EdgeBetweennessClusterer<Number, Number>(numEdgesToRemove);
-//        Set<Set<Number>> clusterSet = clusterer.transform(g);
-//        List<Number> edges = clusterer.getEdgesRemoved();
-
-        int i = 0;
-        //Set the colors of each node so that each cluster's vertices have the same color
-//        for (Iterator<Set<Number>> cIt = clusterSet.iterator(); cIt.hasNext();) {
-//
-//            Set<Number> vertices = cIt.next();
-//            Color c = colors[i % colors.length];
-//
-//            colorCluster(vertices, c);
-//            if (groupClusters == true) {
-//                groupCluster(layout, vertices);
-//            }
-//            i++;
-//        }
-//        for (Number e : g.getEdges()) {
-//
-//            if (edges.contains(e)) {
-//                edgePaints.put(e, Color.lightGray);
-//            } else {
-//                edgePaints.put(e, Color.black);
-//            }
-//        }
-
-        //        	g.removeEdge(e);
-//	g.removeVertex(v1);
+    
+    int getMaxNumLinks() {
+        return theMaxNumLinks;
     }
 
     /**
      * @param args the command line arguments
      */
     public static void main(String[] args) {
-        PeopleGraph sgv = new PeopleGraph("uoe.psv"); // Creates the graph...
+        final PeopleGraph sgv = new PeopleGraph("uoe.psv"); // Creates the graph...
 
         // Layout<V, E>, VisualizationComponent<V,E>
-        Layout<String, String> layout =
+        final AggregateLayout<String, String> layout =
                 new AggregateLayout<String, String>(new FRLayout<String, String>(sgv.peopleGraph));
         layout.setSize(new Dimension(500, 500));
-        VisualizationViewer<String, String> vv = new VisualizationViewer<String, String>(layout);
+        final VisualizationViewer<String, String> vv = new VisualizationViewer<String, String>(layout);
         vv.setPreferredSize(new Dimension(550, 550));
         // Show vertex and edge labels
         vv.getRenderContext().setVertexLabelTransformer(new ToStringLabeller());
@@ -245,7 +200,7 @@ public class PeopleGraph {
         final JLabel rangeSliderValue1 = new JLabel();
         JLabel rangeSliderLabel2 = new JLabel();
         final JLabel rangeSliderValue2 = new JLabel();
-        RangeSlider rangeSlider = new RangeSlider();
+        final RangeSlider rangeSlider = new RangeSlider();
 
         rangeSliderLabel1.setText("Lower:");
         rangeSliderLabel2.setText("Upper:");
@@ -253,15 +208,15 @@ public class PeopleGraph {
         rangeSliderValue2.setHorizontalAlignment(JLabel.LEFT);
 
         rangeSlider.setPreferredSize(new Dimension(240, rangeSlider.getPreferredSize().height));
-        rangeSlider.setMinimum(0);
-        rangeSlider.setMaximum(100);
+        rangeSlider.setMinimum(1);
+        rangeSlider.setMaximum(sgv.getMaxNumLinks());
 
         rangeSlider.addChangeListener(new ChangeListener() {
 
             public void stateChanged(ChangeEvent e) {
                 RangeSlider slider = (RangeSlider) e.getSource();
-                rangeSliderValue1.setText(String.valueOf(slider.getValue()) + "%");
-                rangeSliderValue2.setText(String.valueOf(slider.getUpperValue()) + "%");
+                rangeSliderValue1.setText(String.valueOf(slider.getValue()));
+                rangeSliderValue2.setText(String.valueOf(slider.getUpperValue()));
             }
         });
 
@@ -269,16 +224,11 @@ public class PeopleGraph {
         scramble.addActionListener(new ActionListener() {
 
             public void actionPerformed(ActionEvent arg0) {
-//				Layout layout = vv.getGraphLayout();
-//				layout.initialize();
-//				Relaxer relaxer = vv.getModel().getRelaxer();
-//				if(relaxer != null) {
-//					relaxer.stop();
-//					relaxer.prerelax();
-//					relaxer.relax();
-//				}
-                //					vv.validate();
-//					vv.repaint();
+                layout.removeAll();
+                sgv.generateGraph(rangeSlider.getValue(), rangeSlider.getUpperValue());
+                layout.setGraph(sgv.peopleGraph);
+                vv.validate();
+                vv.repaint();
             }
         });
 
@@ -300,18 +250,13 @@ public class PeopleGraph {
         eastControls.add(scramble, new GridBagConstraints(0, 3, 2, 1, 0.0, 0.0,
                 GridBagConstraints.NORTHWEST, GridBagConstraints.NONE, new Insets(0, 0, 0, 0), 0, 0));
 
-//        final String COMMANDSTRING = "Edges removed for clusters: ";
-//        final String eastSize = COMMANDSTRING + "0"; // edgeBetweennessSlider.getValue();
-
         final TitledBorder sliderBorder = BorderFactory.createTitledBorder("Characteristics");
         eastControls.setBorder(sliderBorder);
-        //eastControls.add(eastSize);
         eastControls.add(Box.createVerticalGlue());
 
         JPanel south = new JPanel();
         JPanel grid = new JPanel(new GridLayout(2, 1));
-//        grid.add(scramble);
-//        grid.add(groupVertices);
+
         south.add(grid);
         south.add(eastControls);
         JPanel p = new JPanel();
@@ -325,15 +270,15 @@ public class PeopleGraph {
         content.add(new GraphZoomScrollPane(vv));
         content.add(south, BorderLayout.SOUTH);
 
-        rangeSlider.setValue(1);
-        rangeSlider.setUpperValue(100);
+        rangeSlider.setValue(2);
+        rangeSlider.setUpperValue(sgv.getMaxNumLinks());
 
         // Initialize value display.
-        rangeSliderValue1.setText(String.valueOf(rangeSlider.getValue()) + "%");
-        rangeSliderValue2.setText(String.valueOf(rangeSlider.getUpperValue()) + "%");
+        rangeSliderValue1.setText(String.valueOf(rangeSlider.getValue()));
+        rangeSliderValue2.setText(String.valueOf(rangeSlider.getUpperValue()));
 
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-//        frame.getContentPane().add(vv);
+
         frame.pack();
         frame.setVisible(true);
     }
