@@ -35,6 +35,7 @@ import java.awt.Insets;
 import java.awt.Paint;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.ListIterator;
 import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
@@ -73,7 +74,7 @@ public class PeopleGraph {
         List<String[]> fileData = CSVFile.getFileData(theFileName, "\\|");
         Map<String, PersonLinks> peopleLinks = generateMap(fileData);
         peopleLinksList = generateSortedLinks(peopleLinks);
-        generateGraph(2, theMaxNumLinks);
+        generateGraph(initialRangeLower(), initialRangeUpper());
     }
 
     private Map<String, PersonLinks> generateMap(List<String[]> fileData) {
@@ -105,17 +106,16 @@ public class PeopleGraph {
         }
 
         Collections.sort(retVal, new LinkNumberComparator());
+        theMaxNumLinks = retVal.get(retVal.size() - 1).numLinks();
 
         for (PersonLinks theLinks : retVal) {
             String theSource = theLinks.getSource();
             int numLinks = theLinks.numLinks();
 
-            if (numLinks > 1) {
+            if (numLinks > initialRangeLower()) {
                 System.out.println(theSource + ":" + Integer.toString(numLinks));
             }
         }
-        
-        theMaxNumLinks = retVal.get(retVal.size() - 1).numLinks();
 
         return retVal;
     }
@@ -132,7 +132,13 @@ public class PeopleGraph {
         Set<String> vertexSet = new TreeSet<String>();
         int edgeCounter = 0;
 
-        for (PersonLinks theLinks : peopleLinksList) {
+        ListIterator<PersonLinks> iter = peopleLinksList.listIterator(peopleLinksList.size());
+
+        while (iter.hasPrevious()) {
+            PersonLinks theLinks = iter.previous();
+
+
+//        for (PersonLinks theLinks : peopleLinksList) {
             String theSourceBaseName = getURLBasename(theLinks.getSource());
             int numLinks = theLinks.numLinks();
 
@@ -159,7 +165,7 @@ public class PeopleGraph {
                 }
             }
         }
-        
+
         this.peopleGraph = g;
     }
 
@@ -168,8 +174,24 @@ public class PeopleGraph {
         String theBasename = theComponents[theComponents.length - 1];
         return theBasename;
     }
-    
+
     int getMaxNumLinks() {
+        return theMaxNumLinks;
+    }
+
+    int initialRangeLower() {
+        if (theMaxNumLinks > 30) {
+            return (int) (theMaxNumLinks * 0.1);
+        }
+
+        return 2;
+    }
+
+    int initialRangeUpper() {
+        if (theMaxNumLinks > 30) {
+            return (int) (theMaxNumLinks * 0.9);
+        }
+
         return theMaxNumLinks;
     }
 
@@ -177,7 +199,7 @@ public class PeopleGraph {
      * @param args the command line arguments
      */
     public static void main(String[] args) {
-        final PeopleGraph sgv = new PeopleGraph("uoe.psv"); // Creates the graph...
+        final PeopleGraph sgv = new PeopleGraph(args[0]); // Creates the graph...
 
         // Layout<V, E>, VisualizationComponent<V,E>
         final AggregateLayout<String, String> layout =
@@ -186,7 +208,7 @@ public class PeopleGraph {
         final VisualizationViewer<String, String> vv = new VisualizationViewer<String, String>(layout);
         vv.setPreferredSize(new Dimension(550, 550));
         // Show vertex and edge labels
-        vv.getRenderContext().setVertexLabelTransformer(new ToStringLabeller());
+//        vv.getRenderContext().setVertexLabelTransformer(new ToStringLabeller());
         vv.getRenderContext().setVertexFillPaintTransformer(MapTransformer.<String, Paint>getInstance(sgv.vertexPaints));
 //      Edge names add no value here  vv.getRenderContext().setEdgeLabelTransformer(new ToStringLabeller());
         // Create a graph mouse and add it to the visualization component
@@ -270,8 +292,8 @@ public class PeopleGraph {
         content.add(new GraphZoomScrollPane(vv));
         content.add(south, BorderLayout.SOUTH);
 
-        rangeSlider.setValue(2);
-        rangeSlider.setUpperValue(sgv.getMaxNumLinks());
+        rangeSlider.setValue(sgv.initialRangeLower());
+        rangeSlider.setUpperValue(sgv.initialRangeUpper());
 
         // Initialize value display.
         rangeSliderValue1.setText(String.valueOf(rangeSlider.getValue()));
