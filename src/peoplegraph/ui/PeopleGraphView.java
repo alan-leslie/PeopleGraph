@@ -46,6 +46,10 @@ import slider.RangeSlider;
 public class PeopleGraphView extends JFrame {
        PeopleGraph theGraph = null;
        
+      public PeopleGraphView(){
+           super("Famous Scots Links");
+       }
+       
     public void setGraph(PeopleGraph theGraph) {
         this.theGraph = theGraph;
     }
@@ -143,9 +147,7 @@ public class PeopleGraphView extends JFrame {
         p.add(gm.getModeComboBox());
         south.add(p);
 
-        JFrame frame = new JFrame("Famous Scots Links");
-
-        Container content = frame.getContentPane();
+        Container content = getContentPane();
         GraphZoomScrollPane scrollPane = new GraphZoomScrollPane(vv);
         JScrollBar hScroll = scrollPane.getHorizontalScrollBar();
         int value = hScroll.getValue();

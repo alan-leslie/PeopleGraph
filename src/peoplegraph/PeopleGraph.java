@@ -4,7 +4,6 @@
  */
 package peoplegraph;
 
-import java.awt.geom.Point2D;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -13,48 +12,18 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 
-import edu.uci.ics.jung.algorithms.layout.FRLayout;
-import edu.uci.ics.jung.algorithms.layout.AggregateLayout;
-import edu.uci.ics.jung.algorithms.layout.Layout;
 import edu.uci.ics.jung.graph.Graph;
 import edu.uci.ics.jung.graph.DirectedSparseMultigraph;
 import edu.uci.ics.jung.graph.util.EdgeType;
-import edu.uci.ics.jung.visualization.GraphZoomScrollPane;
-import edu.uci.ics.jung.visualization.VisualizationViewer;
-import edu.uci.ics.jung.visualization.control.DefaultModalGraphMouse;
-import edu.uci.ics.jung.visualization.control.ModalGraphMouse;
-import edu.uci.ics.jung.visualization.decorators.ToStringLabeller;
 
-import java.awt.BorderLayout;
 import java.awt.Color;
-import java.awt.Container;
-import java.awt.Dimension;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
-import java.awt.GridLayout;
-import java.awt.Insets;
 import java.awt.Paint;
-import java.awt.Point;
-import java.awt.Rectangle;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
+
 import java.util.ListIterator;
 import java.util.Properties;
 import java.util.logging.Logger;
-import javax.swing.BorderFactory;
-import javax.swing.Box;
-import javax.swing.BoxLayout;
-import javax.swing.JButton;
-import javax.swing.JFrame;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
-import javax.swing.JScrollBar;
-import javax.swing.border.TitledBorder;
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
-import org.apache.commons.collections15.Transformer;
-import slider.RangeSlider;
 
+import org.apache.commons.collections15.Transformer;
 import org.apache.commons.collections15.functors.ConstantTransformer;
 import org.apache.commons.collections15.functors.MapTransformer;
 import org.apache.commons.collections15.map.LazyMap;
@@ -133,7 +102,6 @@ public class PeopleGraph {
      * 
      * @param lowerBound - must be less than upper bound and greater than zero
      * @param upperBound
-     * @return
      */
     public void generateGraph(int lowerBound,
             int upperBound) {
@@ -146,8 +114,6 @@ public class PeopleGraph {
         while (iter.hasPrevious()) {
             PersonLinks theLinks = iter.previous();
 
-
-//        for (PersonLinks theLinks : peopleLinksList) {
             String theSourceBaseName = getURLBasename(theLinks.getSource());
             int numLinks = theLinks.numLinks();
 
@@ -217,129 +183,12 @@ public class PeopleGraph {
         return edgePaints;
     }
 
-    /**
-     * @param args the command line arguments
-     */
-//    public static void main(String[] args) {
-//        final PeopleGraph sgv = new PeopleGraph(args[0]); // Creates the graph...
-//
-//        // Layout<V, E>, VisualizationComponent<V,E>
-//        final AggregateLayout<String, String> layout =
-//                new AggregateLayout<String, String>(new FRLayout<String, String>(sgv.peopleGraph));
-//        layout.setSize(new Dimension(5000, 5000));
-//        final VisualizationViewer<String, String> vv = new VisualizationViewer<String, String>(layout);
-//        vv.setPreferredSize(new Dimension(550, 550));
-//        vv.setDoubleBuffered(true);
-////        Point2D center = vv.getCenter();
-////        vv.setLocation((int)center.getX(), (int)center.getY());
-//        // Show vertex and edge labels
-////        vv.getRenderContext().setVertexLabelTransformer(new ToStringLabeller());
-//        vv.getRenderContext().setVertexFillPaintTransformer(MapTransformer.<String, Paint>getInstance(sgv.vertexPaints));
-////      Edge names add no value here  vv.getRenderContext().setEdgeLabelTransformer(new ToStringLabeller());
-//        // Create a graph mouse and add it to the visualization component
-//        DefaultModalGraphMouse gm = new DefaultModalGraphMouse();
-//        gm.setMode(ModalGraphMouse.Mode.TRANSFORMING);
-//        vv.setGraphMouse(gm);
-//        // Add the mouses mode key listener to work it needs to be added to the visualization component
-//        vv.addKeyListener(gm.getModeKeyListener());
-//        Transformer<String, String> theTips = null; //new VoltageTips<Number>();
-//        vv.setVertexToolTipTransformer(null); //todo
-//        
-//        JLabel rangeSliderLabel1 = new JLabel();
-//        final JLabel rangeSliderValue1 = new JLabel();
-//        JLabel rangeSliderLabel2 = new JLabel();
-//        final JLabel rangeSliderValue2 = new JLabel();
-//        final RangeSlider rangeSlider = new RangeSlider();
-//
-//        rangeSliderLabel1.setText("Lower:");
-//        rangeSliderLabel2.setText("Upper:");
-//        rangeSliderValue1.setHorizontalAlignment(JLabel.LEFT);
-//        rangeSliderValue2.setHorizontalAlignment(JLabel.LEFT);
-//
-//        rangeSlider.setPreferredSize(new Dimension(240, rangeSlider.getPreferredSize().height));
-//        rangeSlider.setMinimum(1);
-//        rangeSlider.setMaximum(sgv.getMaxNumLinks());
-//
-//        rangeSlider.addChangeListener(new ChangeListener() {
-//
-//            public void stateChanged(ChangeEvent e) {
-//                RangeSlider slider = (RangeSlider) e.getSource();
-//                rangeSliderValue1.setText(String.valueOf(slider.getValue()));
-//                rangeSliderValue2.setText(String.valueOf(slider.getUpperValue()));
-//            }
-//        });
-//
-//        JButton scramble = new JButton("Recalculate");
-//        scramble.addActionListener(new ActionListener() {
-//
-//            public void actionPerformed(ActionEvent arg0) {
-//                layout.removeAll();
-//                sgv.generateGraph(rangeSlider.getValue(), rangeSlider.getUpperValue());
-//                layout.setGraph(sgv.peopleGraph);
-//                vv.validate();
-//                vv.repaint();
-//            }
-//        });
-//
-//        final JPanel eastControls = new JPanel();
-//        eastControls.setOpaque(true);
-//        eastControls.setLayout(new GridBagLayout());
-//
-//        eastControls.add(Box.createVerticalGlue());
-//        eastControls.add(rangeSliderLabel1, new GridBagConstraints(0, 0, 1, 1, 0.0, 0.0,
-//                GridBagConstraints.NORTHWEST, GridBagConstraints.NONE, new Insets(0, 0, 3, 3), 0, 0));
-//        eastControls.add(rangeSliderValue1, new GridBagConstraints(1, 0, 1, 1, 0.0, 0.0,
-//                GridBagConstraints.NORTHWEST, GridBagConstraints.NONE, new Insets(0, 0, 3, 0), 0, 0));
-//        eastControls.add(rangeSliderLabel2, new GridBagConstraints(0, 1, 1, 1, 0.0, 0.0,
-//                GridBagConstraints.NORTHWEST, GridBagConstraints.NONE, new Insets(0, 0, 3, 3), 0, 0));
-//        eastControls.add(rangeSliderValue2, new GridBagConstraints(1, 1, 1, 1, 0.0, 0.0,
-//                GridBagConstraints.NORTHWEST, GridBagConstraints.NONE, new Insets(0, 0, 6, 0), 0, 0));
-//        eastControls.add(rangeSlider, new GridBagConstraints(0, 2, 2, 1, 0.0, 0.0,
-//                GridBagConstraints.NORTHWEST, GridBagConstraints.NONE, new Insets(0, 0, 0, 0), 0, 0));
-//        eastControls.add(scramble, new GridBagConstraints(0, 3, 2, 1, 0.0, 0.0,
-//                GridBagConstraints.NORTHWEST, GridBagConstraints.NONE, new Insets(0, 0, 0, 0), 0, 0));
-//
-//        final TitledBorder sliderBorder = BorderFactory.createTitledBorder("Characteristics");
-//        eastControls.setBorder(sliderBorder);
-//        eastControls.add(Box.createVerticalGlue());
-//
-//        JPanel south = new JPanel();
-//        JPanel grid = new JPanel(new GridLayout(2, 1));
-//
-//        south.add(grid);
-//        south.add(eastControls);
-//        JPanel p = new JPanel();
-//        p.setBorder(BorderFactory.createTitledBorder("Mouse Mode"));
-//        p.add(gm.getModeComboBox());
-//        south.add(p);
-//
-//        JFrame frame = new JFrame("Famous Scots Links");
-//
-//        Container content = frame.getContentPane();
-//        GraphZoomScrollPane scrollPane = new GraphZoomScrollPane(vv);
-//        JScrollBar hScroll = scrollPane.getHorizontalScrollBar();
-//        int value = hScroll.getValue();
-////        Rectangle theRect = new Rectangle(1000, 1000, 3000, 3000);
-////        scrollPane.scrollRectToVisible(theRect);
-//        content.add(scrollPane);
-//        content.add(south, BorderLayout.SOUTH);
-//
-//        rangeSlider.setValue(sgv.initialRangeLower());
-//        rangeSlider.setUpperValue(sgv.initialRangeUpper());
-//
-//        // Initialize value display.
-//        rangeSliderValue1.setText(String.valueOf(rangeSlider.getValue()));
-//        rangeSliderValue2.setText(String.valueOf(rangeSlider.getUpperValue()));
-//
-//        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-//
-//        frame.pack();
-//        frame.setVisible(true);
-//    }
+ 
     
     public class VoltageTips<E>
     	implements Transformer<String,String> {
         
+        @Override
         public String transform(String vertex) {
            return "Voltage:"; //.transform(vertex);
         }
