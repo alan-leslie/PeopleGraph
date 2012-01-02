@@ -28,11 +28,20 @@ import javax.swing.event.ChangeListener;
 
 import edu.uci.ics.jung.algorithms.layout.AggregateLayout;
 import edu.uci.ics.jung.algorithms.layout.FRLayout;
+import edu.uci.ics.jung.algorithms.layout.GraphElementAccessor;
 import edu.uci.ics.jung.visualization.GraphZoomScrollPane;
+import edu.uci.ics.jung.visualization.Layer;
 import edu.uci.ics.jung.visualization.VisualizationViewer;
+import edu.uci.ics.jung.visualization.control.AbstractPopupGraphMousePlugin;
 import edu.uci.ics.jung.visualization.control.DefaultModalGraphMouse;
 import edu.uci.ics.jung.visualization.control.ModalGraphMouse;
 
+import edu.uci.ics.jung.visualization.transform.MutableTransformer;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
+import java.awt.geom.Point2D;
+import javax.swing.AbstractAction;
+import javax.swing.JPopupMenu;
 import org.apache.commons.collections15.Transformer;
 import org.apache.commons.collections15.functors.MapTransformer;
 
@@ -56,9 +65,10 @@ public class PeopleGraphView extends JFrame {
 
     public void start() {
         // Layout<V, E>, VisualizationComponent<V,E>
+        FRLayout<String, String> frLayout = new FRLayout<String, String>(theGraph.getGraph());
         final AggregateLayout<String, String> layout =
-                new AggregateLayout<String, String>(new FRLayout<String, String>(theGraph.getGraph()));
-        layout.setSize(new Dimension(5000, 5000));
+                new AggregateLayout<String, String>(frLayout);
+        layout.setSize(new Dimension(1000, 1000));
         final VisualizationViewer<String, String> vv = new VisualizationViewer<String, String>(layout);
         vv.setPreferredSize(new Dimension(550, 550));
         vv.setDoubleBuffered(true);
@@ -71,6 +81,7 @@ public class PeopleGraphView extends JFrame {
         // Create a graph mouse and add it to the visualization component
         DefaultModalGraphMouse gm = new DefaultModalGraphMouse();
         gm.setMode(ModalGraphMouse.Mode.TRANSFORMING);
+        gm.add(new MyPopupGraphMousePlugin());
         vv.setGraphMouse(gm);
         // Add the mouses mode key listener to work it needs to be added to the visualization component
         vv.addKeyListener(gm.getModeKeyListener());
@@ -162,10 +173,115 @@ public class PeopleGraphView extends JFrame {
         // Initialize value display.
         rangeSliderValue1.setText(String.valueOf(rangeSlider.getValue()));
         rangeSliderValue2.setText(String.valueOf(rangeSlider.getUpperValue()));
+        
+        Point2D at = layout.transform("University_of_Edinburgh");
+        
+
 
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
         pack();
         setVisible(true);
-    }   
+        
+        	    MutableTransformer layoutTrans = vv.getRenderContext().getMultiLayerTransformer().getTransformer(Layer.LAYOUT);
+	    MutableTransformer viewTrans = vv.getRenderContext().getMultiLayerTransformer().getTransformer(Layer.VIEW);
+//                    layoutTransformer.scale(1.0, 1.0, transformedAt);
+//            viewTransformer.scale(1.0, 1.0, at);
+
+        Point2D ctr = vv.getCenter(); 
+        Point2D pnt = viewTrans.inverseTransform(ctr);
+        Point2D get1 = layout.get(frLayout);
+        double scale = vv.getRenderContext().getMultiLayerTransformer().getTransformer(Layer.VIEW).getScale();
+
+        double deltaX = (ctr.getX() - at.getX())*1/scale;
+        double deltaY = (ctr.getY() - at.getY())*1/scale;
+        Point2D delta = new Point2D.Double(deltaX, deltaY);
+
+        layoutTrans.translate(deltaX, deltaY);
+        Point2D get = layout.get(frLayout);
+
+        
+//        layout.getX( "University_of_Edinburgh" );
+//        layout.getY( v );
+//        layoutTrans..
+//        vv.
+        
+        Point2D ctr2 = vv.getCenter();                                 
+//                        vv.getRenderContext().getMultiLayerTransformer().getTransformer(Layer.VIEW).setScale(scale * 0.5, scale * 0.5, pnt);
+                        vv.repaint();
+
+        
+//        layoutTrans.transform.transform("uoe");
+    }  
+    
+    
+
+
+/**
+ * a GraphMousePlugin that offers popup
+ * menu support
+ */
+protected class MyPopupGraphMousePlugin extends AbstractPopupGraphMousePlugin
+implements MouseListener {
+
+    public MyPopupGraphMousePlugin() {
+        this(MouseEvent.BUTTON3_MASK);
+    }
+    public MyPopupGraphMousePlugin(int modifiers) {
+        super(modifiers);
+    }
+
+    /**
+     * If this event is over a node, pop up a menu to
+     * allow the user to center view to the node
+     *
+     * @param e
+     */
+    protected void handlePopup(MouseEvent e) {
+        final VisualizationViewer<String, String> vv =
+            (VisualizationViewer<String, String>)e.getSource();
+        final Point2D p = e.getPoint(); 
+        
+        
+
+        GraphElementAccessor<String,String> pickSupport = vv.getPickSupport();
+//        if(pickSupport != null) {
+//            final String station = pickSupport.getVertices(null, null).getVertex(vv.getGraphLayout(), p.getX(), p.getY());
+//            if(station != null) {
+                JPopupMenu popup = new JPopupMenu();
+
+                String center = "Center to Node";
+
+                popup.add(new AbstractAction("<html><center>" + center) {
+                    public void actionPerformed(ActionEvent e) {
+
+                        MutableTransformer view = vv.getRenderContext().getMultiLayerTransformer().getTransformer(Layer.VIEW);
+                        MutableTransformer layout = vv.getRenderContext().getMultiLayerTransformer().getTransformer(Layer.LAYOUT);
+
+                        Point2D ctr = vv.getCenter(); 
+                        Point2D pnt = view.inverseTransform(ctr);
+
+                        double scale = vv.getRenderContext().getMultiLayerTransformer().getTransformer(Layer.VIEW).getScale();
+//                        vv.getRenderContext().getMultiLayerTransformer().getTransformer(Layer.VIEW).setScale(scale * 0.1, scale * 0.1, pnt);
+
+                        double deltaX = (ctr.getX() - (p.getX()))*1/scale;
+                        double deltaY = (ctr.getY() - (p.getY()))*1/scale;
+                        Point2D delta = new Point2D.Double(deltaX, deltaY);
+
+                        layout.translate(deltaX, deltaY);
+//                        layout.
+                        Point2D ctr2 = vv.getCenter();  
+                        Point2D pnt2 = view.inverseTransform(ctr);
+                        int x = 0;
+                    }
+                });
+
+                popup.show(vv, e.getX(), e.getY());
+//            } else {
+//
+//            }
+//        }
+    }
+}
+
 }
