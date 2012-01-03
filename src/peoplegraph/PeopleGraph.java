@@ -1,7 +1,3 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package peoplegraph;
 
 import java.util.ArrayList;
@@ -16,17 +12,9 @@ import edu.uci.ics.jung.graph.Graph;
 import edu.uci.ics.jung.graph.DirectedSparseMultigraph;
 import edu.uci.ics.jung.graph.util.EdgeType;
 
-import java.awt.Color;
-import java.awt.Paint;
-
 import java.util.ListIterator;
 import java.util.Properties;
 import java.util.logging.Logger;
-
-import org.apache.commons.collections15.Transformer;
-import org.apache.commons.collections15.functors.ConstantTransformer;
-import org.apache.commons.collections15.functors.MapTransformer;
-import org.apache.commons.collections15.map.LazyMap;
 
 /**
  *
@@ -36,12 +24,6 @@ public class PeopleGraph {
 
     private List<PersonLinks> peopleLinksList = null;
     Graph<String, String> peopleGraph = null;
-    Map<String, Paint> vertexPaints =
-            LazyMap.<String, Paint>decorate(new HashMap<String, Paint>(),
-            new ConstantTransformer(Color.white));
-    Map<String, Paint> edgePaints =
-            LazyMap.<String, Paint>decorate(new HashMap<String, Paint>(),
-            new ConstantTransformer(Color.blue));
     private int theMaxNumLinks = 1;
 
     PeopleGraph(String linkFileName,
@@ -90,7 +72,7 @@ public class PeopleGraph {
             String theSource = theLinks.getSource();
             int numLinks = theLinks.numLinks();
 
-            if (numLinks > initialRangeLower()) {
+            if (numLinks >= initialRangeLower()) {
                 System.out.println(theSource + ":" + Integer.toString(numLinks));
             }
         }
@@ -103,7 +85,7 @@ public class PeopleGraph {
      * @param lowerBound - must be less than upper bound and greater than zero
      * @param upperBound
      */
-    public void generateGraph(int lowerBound,
+    public final void generateGraph(int lowerBound,
             int upperBound) {
         Graph<String, String> g = new DirectedSparseMultigraph<String, String>();
         Set<String> vertexSet = new TreeSet<String>();
@@ -114,29 +96,27 @@ public class PeopleGraph {
         while (iter.hasPrevious()) {
             PersonLinks theLinks = iter.previous();
 
-            String theSourceBaseName = getURLBasename(theLinks.getSource());
+            String theSourceName = theLinks.getSource();
             int numLinks = theLinks.numLinks();
 
             if (numLinks >= lowerBound
                     && numLinks <= upperBound) {
-                if (!vertexSet.contains(theSourceBaseName)) {
-                    g.addVertex(theSourceBaseName);
-                    vertexSet.add(theSourceBaseName);
-                    vertexPaints.put(theSourceBaseName, Color.RED);
+                if (!vertexSet.contains(theSourceName)) {
+                    g.addVertex(theSourceName);
+                    vertexSet.add(theSourceName);
                 }
 
                 for (int i = 0; i < numLinks; ++i) {
-                    String theTargetBasename = getURLBasename(theLinks.getLinkAt(i));
+                    String theTargetName = theLinks.getLinkAt(i);
 
-                    if (!vertexSet.contains(theTargetBasename)) {
-                        g.addVertex(theTargetBasename);
-                        vertexSet.add(theTargetBasename);
-                        vertexPaints.put(theTargetBasename, Color.GREEN);
+                    if (!vertexSet.contains(theTargetName)) {
+                        g.addVertex(theTargetName);
+                        vertexSet.add(theTargetName);
                     }
 
                     String edgeName = "Edge-" + Integer.toString(edgeCounter);
                     ++edgeCounter;
-                    g.addEdge(edgeName, theTargetBasename, theSourceBaseName, EdgeType.DIRECTED);
+                    g.addEdge(edgeName, theTargetName, theSourceName, EdgeType.DIRECTED);
                 }
             }
         }
@@ -144,17 +124,17 @@ public class PeopleGraph {
         this.peopleGraph = g;
     }
 
-    String getURLBasename(String theUrl) {
+    static public String getURLBasename(String theUrl) {
         String[] theComponents = theUrl.split("/");
         String theBasename = theComponents[theComponents.length - 1];
         return theBasename;
     }
 
-    public int getMaxNumLinks() {
+    public final int getMaxNumLinks() {
         return theMaxNumLinks;
     }
 
-    public int initialRangeLower() {
+    public final int initialRangeLower() {
         if (theMaxNumLinks > 30) {
             return (int) (theMaxNumLinks * 0.1);
         }
@@ -162,30 +142,15 @@ public class PeopleGraph {
         return 2;
     }
 
-
     public Graph<String, String> getGraph() {
         return peopleGraph;
     }
-    
-    public int initialRangeUpper() {
+
+    public final int initialRangeUpper() {
         if (theMaxNumLinks > 30) {
             return (int) (theMaxNumLinks * 0.9);
         }
 
         return theMaxNumLinks;
     }
-    
-    public Map<String, Paint> getVertexPaints(){
-        return vertexPaints;
-    }
-    
-    public Map<String, Paint> getEdgePaints(){
-        return edgePaints;
-    }
-
- 
-
 }
-
-    
-
