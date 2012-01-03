@@ -138,7 +138,7 @@ public class PeopleGraphView extends JFrame {
         // Layout<V, E>, VisualizationComponent<V,E>
         FRLayout<String, String> frLayout = new FRLayout<String, String>(theGraph.getGraph());
         layout = new AggregateLayout<String, String>(frLayout);
-        layout.setSize(new Dimension(1000, 1000));
+        layout.setSize(new Dimension(5000, 5000));
         vv = new VisualizationViewer<String, String>(layout);
         vv.setPreferredSize(new Dimension(550, 550));
         vv.setDoubleBuffered(true);
@@ -156,7 +156,7 @@ public class PeopleGraphView extends JFrame {
         vv.setVertexToolTipTransformer(theTips);
         vv.setToolTipText("<html><center>Use the mouse wheel to zoom<p>Click and Drag the mouse to pan<p>Shift-click and Drag to Rotate</center></html>");
 
-        String vertex = "http://en.wikipedia.org/wiki/University_of_Edinburgh"; // get the most pointed to vertex
+        String vertex = theGraph.getMostPopular();
         centerOnVertex(vertex);
 
         final GraphZoomScrollPane panel = new GraphZoomScrollPane(vv);

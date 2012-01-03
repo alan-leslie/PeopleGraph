@@ -25,11 +25,11 @@ public class PeopleGraph {
     private List<PersonLinks> peopleLinksList = null;
     Graph<String, String> peopleGraph = null;
     private int theMaxNumLinks = 1;
+    private String mostPopularVertex = "";
 
-    PeopleGraph(String linkFileName,
-            Properties properties,
+    PeopleGraph(Properties properties,
             Logger logger) {
-        String theFileName = linkFileName;
+        String theFileName = properties.getProperty("LinkFileName", "all_peeps.psv");
 
         List<String[]> fileData = CSVFile.getFileData(theFileName, "\\|");
         Map<String, PersonLinks> peopleLinks = generateMap(fileData);
@@ -92,6 +92,7 @@ public class PeopleGraph {
         int edgeCounter = 0;
 
         ListIterator<PersonLinks> iter = peopleLinksList.listIterator(peopleLinksList.size());
+        mostPopularVertex = "";
 
         while (iter.hasPrevious()) {
             PersonLinks theLinks = iter.previous();
@@ -104,6 +105,10 @@ public class PeopleGraph {
                 if (!vertexSet.contains(theSourceName)) {
                     g.addVertex(theSourceName);
                     vertexSet.add(theSourceName);
+                }
+                
+                if(mostPopularVertex.isEmpty()){               
+                    mostPopularVertex = theSourceName;
                 }
 
                 for (int i = 0; i < numLinks; ++i) {
@@ -152,5 +157,9 @@ public class PeopleGraph {
         }
 
         return theMaxNumLinks;
+    }
+
+    public String getMostPopular() {
+        return mostPopularVertex;
     }
 }

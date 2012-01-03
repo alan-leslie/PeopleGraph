@@ -18,7 +18,7 @@ public class Main {
      * @param args the command line arguments
      */
     // TODO - thread generate graph
-    // center on most pointed to vertex (also after recalculate?)
+    // only draw graph after layout adjustments are complete
     // set size and zoom depending on number of vertices
     // play with FRLayout setting to clarify large number of vertices
 
@@ -41,10 +41,9 @@ public class Main {
             }
         }
 
-        String linkFileName = "3-24.psv";
         Logger theLogger = Main.makeLogger();
         PeopleGraphView theUI = new PeopleGraphView();
-        PeopleGraph theGraph = new PeopleGraph(linkFileName, properties, theLogger);
+        PeopleGraph theGraph = new PeopleGraph(properties, theLogger);
         theUI.setGraph(theGraph);
         theUI.start();
     }
