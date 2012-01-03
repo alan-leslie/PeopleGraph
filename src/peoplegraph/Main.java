@@ -1,7 +1,3 @@
-/*
- * 
- *
- */
 
 package peoplegraph;
 
@@ -20,10 +16,9 @@ import java.util.logging.SimpleFormatter;
 public class Main {
     /**
      * @param args the command line arguments
-     * @throws IOException 
      */
     // TODO -
-    // Dead end page for case when it is a form
+
     public static void main(String[] args) {
         Properties properties = new Properties();
         FileInputStream is = null;

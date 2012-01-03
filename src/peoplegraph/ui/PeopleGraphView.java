@@ -144,33 +144,20 @@ public class PeopleGraphView extends JFrame {
         vv.setDoubleBuffered(true);
 
         // Show vertex and edge labels
-//        vv.getRenderContext().setVertexLabelTransformer(new ToStringLabeller());
-//       vv.getRenderContext().setVertexFillPaintTransformer(MapTransformer.<String, Paint>getInstance(theGraph.getVertexPaints()));
+        // Vertex labels unusable when there are many vv.getRenderContext().setVertexLabelTransformer(new ToStringLabeller());
         PickedState<String> picked_state = vv.getPickedVertexState();
         seedFillColor = new SeedFillColor<String>(picked_state);
         seedDrawColor = new SeedDrawColor<String>(picked_state);
         //      Edge names add no value here  vv.getRenderContext().setEdgeLabelTransformer(new ToStringLabeller());
-//        vv.getRenderContext().setVertexFillPaintTransformer(seedFillColor);
-//        vv.getRenderContext().setVertexDrawPaintTransformer(seedDrawColor);
-        // Create a graph mouse and add it to the visualization component
+        vv.getRenderContext().setVertexFillPaintTransformer(seedFillColor);
+        vv.getRenderContext().setVertexDrawPaintTransformer(seedDrawColor);
 
         Transformer<String, String> theTips = new ToolTips<String>();
         vv.setVertexToolTipTransformer(theTips);
         vv.setToolTipText("<html><center>Use the mouse wheel to zoom<p>Click and Drag the mouse to pan<p>Shift-click and Drag to Rotate</center></html>");
 
-        MutableTransformer layoutTrans = vv.getRenderContext().getMultiLayerTransformer().getTransformer(Layer.LAYOUT);
-        MutableTransformer viewTrans = vv.getRenderContext().getMultiLayerTransformer().getTransformer(Layer.VIEW);
-
-        Point2D ctr = vv.getCenter();
-        Point2D pnt = viewTrans.inverseTransform(ctr);
-
-        double scale = vv.getRenderContext().getMultiLayerTransformer().getTransformer(Layer.VIEW).getScale();
-        Point2D at = layout.transform("http://en.wikipedia.org/wiki/University_of_Edinburgh");
-        double deltaX = (ctr.getX() - at.getX()) * 1 / scale;
-        double deltaY = (ctr.getY() - at.getY()) * 1 / scale;
-        Point2D delta = new Point2D.Double(deltaX, deltaY);
-
-        layoutTrans.translate(deltaX, deltaY);
+        String vertex = "http://en.wikipedia.org/wiki/University_of_Edinburgh"; // get the most pointed to vertex
+        centerOnVertex(vertex);
 
         final GraphZoomScrollPane panel = new GraphZoomScrollPane(vv);
         content.add(panel);
@@ -192,6 +179,7 @@ public class PeopleGraphView extends JFrame {
         JPanel p = new JPanel();
         setupGraphView(content);
 
+        // Create a graph mouse and add it to the visualization component
         DefaultModalGraphMouse gm = new DefaultModalGraphMouse();
         gm.setMode(ModalGraphMouse.Mode.TRANSFORMING);
         gm.add(new MyPopupGraphMousePlugin());
@@ -209,6 +197,27 @@ public class PeopleGraphView extends JFrame {
 
         pack();
         setVisible(true);
+    }
+    
+    private void centerOnPoint(Point2D at) {
+        MutableTransformer layoutTrans = vv.getRenderContext().getMultiLayerTransformer().getTransformer(Layer.LAYOUT);
+        MutableTransformer viewTrans = vv.getRenderContext().getMultiLayerTransformer().getTransformer(Layer.VIEW);
+
+        Point2D ctr = vv.getCenter();
+        Point2D pnt = viewTrans.inverseTransform(ctr);
+
+        double scale = vv.getRenderContext().getMultiLayerTransformer().getTransformer(Layer.VIEW).getScale();
+
+        double deltaX = (ctr.getX() - at.getX()) * 1 / scale;
+        double deltaY = (ctr.getY() - at.getY()) * 1 / scale;
+        Point2D delta = new Point2D.Double(deltaX, deltaY);
+
+        layoutTrans.translate(deltaX, deltaY);
+    }
+
+    private void centerOnVertex(String vertex) {
+        Point2D at = layout.transform(vertex);
+        centerOnPoint(at);
     }
 
     public class ToolTips<E>
@@ -251,8 +260,6 @@ public class PeopleGraphView extends JFrame {
                     (VisualizationViewer<String, String>) e.getSource();
             final Point2D p = e.getPoint();
 
-
-
             GraphElementAccessor<String, String> pickSupport = vv.getPickSupport();
             if (pickSupport != null) {
                 final String station = pickSupport.getVertex(vv.getGraphLayout(), p.getX(), p.getY());
@@ -265,20 +272,7 @@ public class PeopleGraphView extends JFrame {
 
                         @Override
                         public void actionPerformed(ActionEvent e) {
-
-                            MutableTransformer view = vv.getRenderContext().getMultiLayerTransformer().getTransformer(Layer.VIEW);
-                            MutableTransformer layout = vv.getRenderContext().getMultiLayerTransformer().getTransformer(Layer.LAYOUT);
-
-                            Point2D ctr = vv.getCenter();
-                            Point2D pnt = view.inverseTransform(ctr);
-
-                            double scale = vv.getRenderContext().getMultiLayerTransformer().getTransformer(Layer.VIEW).getScale();
-
-                            double deltaX = (ctr.getX() - (p.getX())) * 1 / scale;
-                            double deltaY = (ctr.getY() - (p.getY())) * 1 / scale;
-                            Point2D delta = new Point2D.Double(deltaX, deltaY);
-
-                            layout.translate(deltaX, deltaY);
+                            centerOnPoint(p);
                         }
                     });
 
@@ -290,83 +284,44 @@ public class PeopleGraphView extends JFrame {
     }
 
     private final class SeedDrawColor<V> implements Transformer<V, Paint> {
-
         protected PickedInfo<V> pi;
-        protected final static float dark_value = 0.8f;
-        protected final static float light_value = 0.2f;
-        protected boolean seed_coloring;
 
         public SeedDrawColor(PickedInfo<V> pi) {
             this.pi = pi;
-            seed_coloring = false;
-        }
-
-        public void setSeedColoring(boolean b) {
-            this.seed_coloring = b;
         }
 
         @Override
         public Paint transform(V v) {
             return Color.BLACK;
         }
-//        public Paint getFillPaint(V v)
-//        {
-//            float alpha = transparency.get(v).floatValue();
-//            if (pi.isPicked(v))
-//            {
-//                return new Color(1f, 1f, 0, alpha); 
-//            }
-//            else
-//            {
-//                if (seed_coloring && seedVertices.contains(v))
-//                {
-//                    Color dark = new Color(0, 0, dark_value, alpha);
-//                    Color light = new Color(0, 0, light_value, alpha);
-//                    return new GradientPaint( 0, 0, dark, 10, 0, light, true);
-//                }
-//                else
-//                    return new Color(1f, 0, 0, alpha);
-//            }
-//                
-//        }
     }
 
     private final class SeedFillColor<V> implements Transformer<V, Paint> {
-
         protected PickedInfo<V> pi;
-        protected final static float dark_value = 0.8f;
-        protected final static float light_value = 0.2f;
-        protected boolean seed_coloring;
 
         public SeedFillColor(PickedInfo<V> pi) {
             this.pi = pi;
-            seed_coloring = false;
         }
 
-        public void setSeedColoring(boolean b) {
-            this.seed_coloring = b;
-        }
-
-//        public Paint getDrawPaint(V v)
-//        {
-//            return Color.BLACK;
-//        }
         @Override
         public Paint transform(V v) {
-            float alpha = 1.0F; //transparency.get(v).floatValue();
             if (pi.isPicked(v)) {
-                return new Color(1f, 1f, 0, alpha);
+                return Color.YELLOW;
             } else {
-//                if (seed_coloring && seedVertices.contains(v))
-//                {
-//                    Color dark = new Color(0, 0, dark_value, alpha);
-//                    Color light = new Color(0, 0, light_value, alpha);
-//                    return new GradientPaint( 0, 0, dark, 10, 0, light, true);
-//                }
-//                else
-                return new Color(1f, 0, 0, alpha);
-            }
+                String vertex = (String)v;
+                int inDegree = theGraph.getGraph().inDegree(vertex);
+                int outDegree = theGraph.getGraph().outDegree(vertex);
+                
+                if(inDegree > 0){
+                    if(outDegree > 0){
+                        return Color.BLUE;                        
+                    } else {
+                        return Color.RED;                        
+                    }              
+                }
 
+                return Color.GREEN;
+            }
         }
     }
 }
