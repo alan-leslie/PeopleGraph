@@ -1,7 +1,4 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
+
 package peoplegraph.ui;
 
 import java.awt.BorderLayout;
@@ -133,8 +130,8 @@ public class PeopleGraphView extends JFrame {
         rangeSliderValue1.setText(String.valueOf(rangeSlider.getValue()));
         rangeSliderValue2.setText(String.valueOf(rangeSlider.getUpperValue()));
     }
-
-    public void start() {
+    
+    private void setupGraphView(Container content){
         // Layout<V, E>, VisualizationComponent<V,E>
         FRLayout<String, String> frLayout = new FRLayout<String, String>(theGraph.getGraph());
         layout = new AggregateLayout<String, String>(frLayout);
@@ -142,34 +139,15 @@ public class PeopleGraphView extends JFrame {
         vv = new VisualizationViewer<String, String>(layout);
         vv.setPreferredSize(new Dimension(550, 550));
         vv.setDoubleBuffered(true);
-//        Point2D center = vv.getCenter();
-//        vv.setLocation((int)center.getX(), (int)center.getY());
+
         // Show vertex and edge labels
 //        vv.getRenderContext().setVertexLabelTransformer(new ToStringLabeller());
         vv.getRenderContext().setVertexFillPaintTransformer(MapTransformer.<String, Paint>getInstance(theGraph.getVertexPaints()));
 //      Edge names add no value here  vv.getRenderContext().setEdgeLabelTransformer(new ToStringLabeller());
         // Create a graph mouse and add it to the visualization component
-        DefaultModalGraphMouse gm = new DefaultModalGraphMouse();
-        gm.setMode(ModalGraphMouse.Mode.TRANSFORMING);
-        gm.add(new MyPopupGraphMousePlugin());
-        vv.setGraphMouse(gm);
-        // Add the mouses mode key listener to work it needs to be added to the visualization component
-        vv.addKeyListener(gm.getModeKeyListener());
+
         Transformer<String, String> theTips = new ToolTips<String>();
         vv.setVertexToolTipTransformer(theTips);
-
-        final JPanel eastControls = new JPanel();
-        setupRangeControls(eastControls);
-
-        JPanel south = new JPanel();
-        JPanel grid = new JPanel(new GridLayout(2, 1));
-
-        south.add(grid);
-        south.add(eastControls);
-        JPanel p = new JPanel();
-        p.setBorder(BorderFactory.createTitledBorder("Mouse Mode"));
-        p.add(gm.getModeComboBox());
-        south.add(p);
 
         MutableTransformer layoutTrans = vv.getRenderContext().getMultiLayerTransformer().getTransformer(Layer.LAYOUT);
         MutableTransformer viewTrans = vv.getRenderContext().getMultiLayerTransformer().getTransformer(Layer.VIEW);
@@ -184,21 +162,44 @@ public class PeopleGraphView extends JFrame {
         Point2D delta = new Point2D.Double(deltaX, deltaY);
 
         layoutTrans.translate(deltaX, deltaY);
-        Point2D get = layout.get(frLayout);
+        
+        final GraphZoomScrollPane panel = new GraphZoomScrollPane(vv);
+        content.add(panel);
+    }
+
+    public void start() {
+
+        final JPanel eastControls = new JPanel();
+        setupRangeControls(eastControls);
+
+        JPanel south = new JPanel();
+        JPanel grid = new JPanel(new GridLayout(2, 1));
+
+        south.add(grid);
+        south.add(eastControls);
 
         Container content = getContentPane();
-        GraphZoomScrollPane scrollPane = new GraphZoomScrollPane(vv);
-
-        content.add(scrollPane);
+        
+        JPanel p = new JPanel();
+        setupGraphView(content);
+             
+        DefaultModalGraphMouse gm = new DefaultModalGraphMouse();
+        gm.setMode(ModalGraphMouse.Mode.TRANSFORMING);
+        gm.add(new MyPopupGraphMousePlugin());
+        vv.setGraphMouse(gm);
+        // Add the mouses mode key listener to work it needs to be added to the visualization component
+        vv.addKeyListener(gm.getModeKeyListener());
+        
+        p.setBorder(BorderFactory.createTitledBorder("Mouse Mode"));
+        p.add(gm.getModeComboBox());
+  
+        south.add(p);
         content.add(south, BorderLayout.SOUTH);
 
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
         pack();
         setVisible(true);
-
-//                        vv.getRenderContext().getMultiLayerTransformer().getTransformer(Layer.VIEW).setScale(scale * 0.5, scale * 0.5, pnt);
-//                        vv.repaint();
     }
 
     public class ToolTips<E>
@@ -206,7 +207,7 @@ public class PeopleGraphView extends JFrame {
 
         @Override
         public String transform(String vertex) {
-            return "Voltage:"; //.transform(vertex);
+            return vertex;
         }
     }
 
