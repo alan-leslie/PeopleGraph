@@ -184,15 +184,6 @@ public class PeopleGraph {
     }
 
  
-    
-    public class VoltageTips<E>
-    	implements Transformer<String,String> {
-        
-        @Override
-        public String transform(String vertex) {
-           return "Voltage:"; //.transform(vertex);
-        }
-    }
 
 }
 
