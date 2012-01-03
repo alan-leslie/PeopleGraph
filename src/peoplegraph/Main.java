@@ -17,7 +17,10 @@ public class Main {
     /**
      * @param args the command line arguments
      */
-    // TODO -
+    // TODO - thread generate graph
+    // center on most pointed to vertex (also after recalculate?)
+    // set size and zoom depending on number of vertices
+    // play with FRLayout setting to clarify large number of vertices
 
     public static void main(String[] args) {
         Properties properties = new Properties();
