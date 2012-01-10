@@ -43,6 +43,7 @@ import edu.uci.ics.jung.visualization.transform.MutableTransformer;
 import org.apache.commons.collections15.Transformer;
 //import org.apache.commons.collections15.functors.MapTransformer;
 
+import peoplegraph.PageLauncher;
 import peoplegraph.PeopleGraph;
 import slider.RangeSlider;
 
@@ -219,6 +220,10 @@ public class PeopleGraphView extends JFrame {
         Point2D at = layout.transform(vertex);
         centerOnPoint(at);
     }
+    
+    private void goToPage(String vertex) {
+        PageLauncher.getInstance().launch(vertex);
+    }
 
     public class ToolTips<E>
             implements Transformer<String, String> {
@@ -276,6 +281,16 @@ public class PeopleGraphView extends JFrame {
                         }
                     });
 
+                    String goToPage = "Open in Browser";
+
+                    popup.add(new AbstractAction("<html><center>" + goToPage) {
+
+                        @Override
+                        public void actionPerformed(ActionEvent e) {
+                            goToPage(station);
+                        }
+                    });
+                    
                     popup.show(vv, e.getX(), e.getY());
                 } else {
                 }

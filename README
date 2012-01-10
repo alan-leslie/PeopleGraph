@@ -1,1 +1,7 @@
 Visualisation of wikipedoa web page links for famous scots
+Written in java using NetBeans
+Uses: 
+JUNG java library (http://jung.sourceforge.net/) FRLayout for graph visualisation
+A range slider http://ernienotes.wordpress.com/2010/12/27/creating-a-java-swing-range-slider/
+Eclipse SWT to launch browser
+
