@@ -39,5 +39,33 @@ public class CSVFile {
         }
         
         return retVal;
-    }    
+    }
+
+    static List<String> getFileLines(String fileName) {
+        FileReader theReader = null;
+        List<String> retVal = new ArrayList<String>();
+
+        try {
+            theReader = new FileReader(fileName);
+            BufferedReader in = new BufferedReader(theReader);
+            
+            String theLine = null;
+            
+            while ((theLine = in.readLine()) != null) {
+                retVal.add(theLine);
+            }
+        } catch (IOException e) {
+            // ...
+        } finally {
+            if (null != theReader) {
+                try {
+                    theReader.close();
+                } catch (IOException e) {
+                    /* .... */
+                }
+            }
+        }
+        
+        return retVal;
+    }
 }

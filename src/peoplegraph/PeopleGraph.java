@@ -26,12 +26,25 @@ public class PeopleGraph {
     Graph<String, String> peopleGraph = null;
     private int theMaxNumLinks = 1;
     private String mostPopularVertex = "";
+    private Set<String> isPersonSet = null;
 
     PeopleGraph(Properties properties,
             Logger logger) {
         String theFileName = properties.getProperty("LinkFileName", "all_peeps.psv");
 
         List<String[]> fileData = CSVFile.getFileData(theFileName, "\\|");
+        
+        String theIsPersonFileName = properties.getProperty("IsPersonFileName", "peeps_classify.txt");
+
+        List<String> isPersonData = CSVFile.getFileLines(theIsPersonFileName);
+        
+        isPersonSet = new TreeSet<String>();
+        
+        for(String person: isPersonData){
+                isPersonSet.add(person); 
+        }
+        
+        
         Map<String, PersonLinks> peopleLinks = generateMap(fileData);
         peopleLinksList = generateSortedLinks(peopleLinks);
         generateGraph(initialRangeLower(), initialRangeUpper());
@@ -45,13 +58,18 @@ public class PeopleGraph {
             String theTarget = theLinkPair[0];
             PersonLinks theLinks = null;
 
-            if (retVal.containsKey(theSource)) {
-                theLinks = retVal.get(theSource);
-                theLinks.addLink(theTarget);
-            } else {
-                theLinks = new PersonLinks(theSource);
-                theLinks.addLink(theTarget);
-                retVal.put(theSource, theLinks);
+            if(isPersonSet.contains(theSource) &&
+                    isPersonSet.contains(theTarget)){
+                if (retVal.containsKey(theSource)) {
+                    theLinks = retVal.get(theSource);
+                    if(!theLinks.otherLinks.contains(theTarget)){
+                        theLinks.addLink(theTarget);
+                    }
+                } else {
+                    theLinks = new PersonLinks(theSource);
+                    theLinks.addLink(theTarget);
+                    retVal.put(theSource, theLinks);
+                }
             }
         }
 
@@ -66,7 +84,9 @@ public class PeopleGraph {
         }
 
         Collections.sort(retVal, new LinkNumberComparator());
-        theMaxNumLinks = retVal.get(retVal.size() - 1).numLinks();
+        int lastIndex = retVal.size() - 1;
+        PersonLinks mostPopular = retVal.get(lastIndex);
+        theMaxNumLinks = mostPopular.numLinks();
 
         for (PersonLinks theLinks : retVal) {
             String theSource = theLinks.getSource();
