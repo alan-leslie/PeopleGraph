@@ -40,7 +40,7 @@ public class CSVFile {
         return retVal;
     }
 
-    static List<String> getFileLines(String fileName) {
+    static List<String> getFileLines(String fileName) throws IOException {
         FileReader theReader = null;
         List<String> retVal = new ArrayList<String>();
 
@@ -53,8 +53,6 @@ public class CSVFile {
             while ((theLine = in.readLine()) != null) {
                 retVal.add(theLine);
             }
-        } catch (IOException e) {
-            // ...
         } finally {
             if (null != theReader) {
                 try {

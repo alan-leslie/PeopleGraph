@@ -138,10 +138,13 @@ public class PeopleGraphView extends JFrame {
     private void setupGraphView(Container content) {
         // Layout<V, E>, VisualizationComponent<V,E>
         FRLayout<String, String> frLayout = new FRLayout<String, String>(theGraph.getGraph());
+        frLayout.setAttractionMultiplier(0.75);
+        frLayout.setRepulsionMultiplier(0.85);
+        
         layout = new AggregateLayout<String, String>(frLayout);
-        layout.setSize(new Dimension(5000, 5000));
+        layout.setSize(new Dimension(1500, 1100));
         vv = new VisualizationViewer<String, String>(layout);
-        vv.setPreferredSize(new Dimension(550, 550));
+        vv.setPreferredSize(new Dimension(750, 550));
         vv.setDoubleBuffered(true);
 
         // Show vertex and edge labels
