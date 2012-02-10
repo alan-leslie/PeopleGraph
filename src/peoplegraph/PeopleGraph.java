@@ -1,5 +1,6 @@
 package peoplegraph;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -29,22 +30,22 @@ public class PeopleGraph {
     private Set<String> isPersonSet = null;
 
     PeopleGraph(Properties properties,
-            Logger logger) {
+            Logger logger) throws IOException {
         String theFileName = properties.getProperty("LinkFileName", "all_peeps.psv");
 
         List<String[]> fileData = CSVFile.getFileData(theFileName, "\\|");
-        
+
         String theIsPersonFileName = properties.getProperty("IsPersonFileName", "peeps_classify.txt");
 
         List<String> isPersonData = CSVFile.getFileLines(theIsPersonFileName);
-        
+
         isPersonSet = new TreeSet<String>();
-        
-        for(String person: isPersonData){
-                isPersonSet.add(person); 
+
+        for (String person : isPersonData) {
+            isPersonSet.add(person);
         }
-        
-        
+
+
         Map<String, PersonLinks> peopleLinks = generateMap(fileData);
         peopleLinksList = generateSortedLinks(peopleLinks);
         generateGraph(initialRangeLower(), initialRangeUpper());
@@ -58,11 +59,11 @@ public class PeopleGraph {
             String theTarget = theLinkPair[0];
             PersonLinks theLinks = null;
 
-            if(isPersonSet.contains(theSource) &&
-                    isPersonSet.contains(theTarget)){
+            if (isPersonSet.contains(theSource)
+                    && isPersonSet.contains(theTarget)) {
                 if (retVal.containsKey(theSource)) {
                     theLinks = retVal.get(theSource);
-                    if(!theLinks.otherLinks.contains(theTarget)){
+                    if (!theLinks.otherLinks.contains(theTarget)) {
                         theLinks.addLink(theTarget);
                     }
                 } else {
@@ -126,8 +127,8 @@ public class PeopleGraph {
                     g.addVertex(theSourceName);
                     vertexSet.add(theSourceName);
                 }
-                
-                if(mostPopularVertex.isEmpty()){               
+
+                if (mostPopularVertex.isEmpty()) {
                     mostPopularVertex = theSourceName;
                 }
 

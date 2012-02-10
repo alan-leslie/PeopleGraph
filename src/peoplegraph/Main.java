@@ -1,6 +1,6 @@
-
 package peoplegraph;
 
+import java.util.logging.Level;
 import peoplegraph.ui.PeopleGraphView;
 import java.io.IOException;
 import java.io.FileInputStream;
@@ -14,6 +14,7 @@ import java.util.logging.SimpleFormatter;
  * @author al
  */
 public class Main {
+
     /**
      * @param args the command line arguments
      */
@@ -21,31 +22,35 @@ public class Main {
     // only draw graph after layout adjustments are complete
     // set size and zoom depending on number of vertices
     // play with FRLayout setting to clarify large number of vertices
-
     public static void main(String[] args) {
         Properties properties = new Properties();
         FileInputStream is = null;
-        
+
         try {
-            is = new FileInputStream( "PeopleGraph.properties" );
-            properties.load( is );
-        } catch( IOException e ) {
+            is = new FileInputStream("PeopleGraph.properties");
+            properties.load(is);
+        } catch (IOException e) {
             // ...
         } finally {
-            if( null != is ) {
+            if (null != is) {
                 try {
                     is.close();
-                } catch( IOException e ) {
+                } catch (IOException e) {
                     /* .... */
                 }
             }
         }
 
         Logger theLogger = Main.makeLogger();
-        PeopleGraphView theUI = new PeopleGraphView();
-        PeopleGraph theGraph = new PeopleGraph(properties, theLogger);
-        theUI.setGraph(theGraph);
-        theUI.start();
+        
+        try {
+            PeopleGraph theGraph = new PeopleGraph(properties, theLogger);
+            PeopleGraphView theUI = new PeopleGraphView();
+            theUI.setGraph(theGraph);
+            theUI.start();
+        } catch (IOException ex) {
+            theLogger.log(Level.SEVERE, null, ex);
+        }
     }
 
     /**

@@ -11,23 +11,22 @@ import java.util.List;
  * @author al
  */
 public class CSVFile {
-    public static List<String[]> getFileData(String fileName, 
-            String splitChar) {
+
+    public static List<String[]> getFileData(String fileName,
+            String splitChar) throws IOException {
         FileReader theReader = null;
         List<String[]> retVal = new ArrayList<String[]>();
 
         try {
             theReader = new FileReader(fileName);
             BufferedReader in = new BufferedReader(theReader);
-            
+
             String theLine = null;
-            
+
             while ((theLine = in.readLine()) != null) {
                 String theLineArr[] = theLine.split(splitChar);
                 retVal.add(theLineArr);
             }
-        } catch (IOException e) {
-            // ...
         } finally {
             if (null != theReader) {
                 try {
@@ -37,7 +36,7 @@ public class CSVFile {
                 }
             }
         }
-        
+
         return retVal;
     }
 
@@ -48,9 +47,9 @@ public class CSVFile {
         try {
             theReader = new FileReader(fileName);
             BufferedReader in = new BufferedReader(theReader);
-            
+
             String theLine = null;
-            
+
             while ((theLine = in.readLine()) != null) {
                 retVal.add(theLine);
             }
@@ -65,7 +64,7 @@ public class CSVFile {
                 }
             }
         }
-        
+
         return retVal;
     }
 }
